@@ -28,6 +28,36 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&amp;family=Courier+Prime:ital,wght@0,400;1,400&amp;display=swap">
 
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    #jh-cursor-trail {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    #jh-cursor-trail span {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 24px;
+      height: 30px;
+      filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1px #fff);
+    }
+
+    #jh-cursor-trail span::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #171717;
+      clip-path: polygon(0 0, 0 82%, 27% 62%, 48% 98%, 67% 87%, 47% 54%, 82% 54%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #jh-cursor-trail { display: none; }
+    }
+  </style>
 </head>
 <body>
 
@@ -111,5 +141,38 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <div id="jh-cursor-trail" aria-hidden="true"></div>
+  <script>
+    (() => {
+      const trail = document.getElementById('jh-cursor-trail');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let lastTime = -Infinity;
+      let lastX = -Infinity;
+      let lastY = -Infinity;
+
+      window.addEventListener('pointermove', event => {
+        if (event.pointerType !== 'mouse' || reducedMotion.matches) return;
+
+        const { clientX: x, clientY: y, timeStamp } = event;
+        if (timeStamp - lastTime < 42 || Math.hypot(x - lastX, y - lastY) < 8) return;
+        lastTime = timeStamp;
+        lastX = x;
+        lastY = y;
+
+        for (let index = 0; index < 3; index++) {
+          const echo = document.createElement('span');
+          const offset = index * 4;
+          const opacity = 0.45 + index * 0.2;
+          trail.append(echo);
+          const animation = echo.animate([
+            { transform: 'translate(' + (x + offset) + 'px, ' + y + 'px)', opacity },
+            { transform: 'translate(' + (x + offset - 7) + 'px, ' + (y + 5) + 'px)', opacity: opacity * 0.65, offset: 0.4 },
+            { transform: 'translate(' + (x + offset + 4) + 'px, ' + (y + 9) + 'px)', opacity: 0 }
+          ], { duration: 420, easing: 'steps(5, end)' });
+          animation.onfinish = () => echo.remove();
+        }
+      }, { passive: true });
+    })();
+  </script>
 </body>
 </html>
