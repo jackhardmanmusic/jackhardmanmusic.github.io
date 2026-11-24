@@ -1,0 +1,280 @@
+/* ==========================================================================
+   Jack Hardman – one-page site
+   Clean rebuild of the Squarespace design (same layout, type and colours)
+   ========================================================================== */
+
+/* --- Tokens ---------------------------------------------------------------- */
+:root {
+  --bg: #f5f5f3;
+  --ink: #000;
+  --dark: #1c1c1d;
+  --light: #f5f5f3;
+
+  /* Fonts: Adobe Fonts first (see comment in index.html), Google fallbacks after */
+  --font-heading: "pragmatica-extended", "Archivo", "Arial Black", Arial, sans-serif;
+  --font-body: "courier-std", "Courier Prime", "Courier New", Courier, monospace;
+
+  --gap: 10px;              /* grid gutter */
+  --max-width: 1800px;      /* max content width (same as the original site) */
+  --site-gutter: 6vw;       /* side margin (mobile) */
+  --header-h: 75px;
+  --fit-ratio: 0.1257;      /* h1 font-size ÷ width, used until fit-text JS runs */
+}
+
+@media (min-width: 768px) {
+  :root {
+    --site-gutter: 4vw;
+    --header-h: calc(4.4vw + 20px);
+  }
+}
+
+/* --- Reset / base ---------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.3em;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+h1, h2, h4, p, ul { margin: 0; padding: 0; }
+ul { list-style: none; }
+a { color: inherit; }
+
+h1, h2, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.08em;
+}
+
+h2 {
+  /* same fluid sizing the original used: height-based on phones, width-based on desktop */
+  font-size: calc(0.03 * min(100vh, 900px) + 1rem);
+  line-height: 1.17em;
+}
+@media (min-width: 768px) {
+  h2 { font-size: min(3vw + 1rem, 70px); }
+}
+h4 { font-size: 1rem; line-height: 1.3em; }
+
+p + p { margin-top: 1rem; }
+
+/* --- Column grid (24 columns on desktop, 8 on mobile) ---------------------- */
+.grid {
+  --edge: calc(var(--site-gutter) - var(--gap));
+  --cell: calc((var(--max-width) - var(--gap) * 7) / 8);
+  display: grid;
+  position: relative;
+  column-gap: var(--gap);
+  row-gap: var(--gap);
+  grid-template-columns:
+    minmax(var(--edge), 1fr)
+    repeat(8, minmax(0, var(--cell)))
+    minmax(var(--edge), 1fr);
+  overflow-x: clip;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    --cell: calc((var(--max-width) - var(--gap) * 23) / 24);
+    --content: min(var(--max-width), 100vw - var(--site-gutter) * 2);
+    --row: calc(var(--content) * 0.0215);
+    grid-template-columns:
+      minmax(var(--edge), 1fr)
+      repeat(24, minmax(0, var(--cell)))
+      minmax(var(--edge), 1fr);
+  }
+}
+
+.section { background: var(--bg); border-bottom: 1px solid #000; }
+
+/* --- Header ---------------------------------------------------------------- */
+.site-header {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  height: var(--header-h);
+  background: var(--bg);
+  border-bottom: 1px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-inline: var(--site-gutter);
+}
+/* soft drop shadow under the header bar */
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 12px 12px 0 rgb(40, 40, 42);
+  opacity: 0.15;
+  pointer-events: none;
+}
+.site-header__social { position: relative; z-index: 1; display: block; width: 20px; height: 20px; color: var(--ink); }
+.site-header__social svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+
+/* --- Fit text (headline is sized by JS to fill its box exactly) ------------ */
+.fit-text { white-space: nowrap; line-height: 1; }
+.fit-text > span { display: inline-block; }
+
+/* --- Intro / hero ---------------------------------------------------------- */
+.hero {
+  padding-top: var(--header-h);
+  grid-template-rows: repeat(37, minmax(24px, auto));
+}
+
+.hero__name {
+  grid-column: 2 / 10;
+  grid-row: 2 / 5;
+  font-size: calc(min(var(--max-width), 100vw - var(--site-gutter) * 2) * var(--fit-ratio));
+}
+.hero__role {
+  grid-column: 2 / 10;
+  grid-row: 4 / 5;
+  z-index: 2;
+  text-align: center;
+}
+.hero__photo {
+  grid-column: 2 / 10;
+  grid-row: 5 / 21;
+  position: relative;       /* image fills the box without stretching the grid rows */
+}
+.hero__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.hero__bio {
+  grid-column: 2 / 10;
+  grid-row: 22 / 36;
+}
+
+@media (min-width: 768px) {
+  .hero { grid-template-rows: repeat(27, minmax(var(--row), auto)); }
+
+  .hero__name  { grid-column: 2 / 26; grid-row: 2 / 7; }
+  .hero__role  { grid-column: 16 / 25; grid-row: 6 / 7; z-index: 2; }
+  .hero__photo { grid-column: 2 / 16;  grid-row: 8 / 26; }
+  .hero__bio   { grid-column: 17 / 25; grid-row: 12 / 23; align-self: end; }
+}
+
+/* --- Music + Film shared --------------------------------------------------- */
+.music, .film {
+  grid-template-rows: auto auto 1fr;
+  row-gap: 0;
+  padding-top: var(--pad-top);
+}
+.music__title, .film__title { grid-row: 1; }
+.music__credits, .film__credits { grid-row: 2; margin-top: 20px; }
+
+/* mobile: everything stacks in the content column */
+.music__title, .music__credits,
+.film__title,  .film__credits { grid-column: 2 / 10; }
+
+.music__slider, .film__slider { grid-column: 2 / 10; grid-row: 3; }
+
+.music { padding-bottom: 92px; --pad-top: 64px; }
+.music__slider { margin-top: 57px; }
+
+.film { padding-bottom: 57px; --pad-top: 65px; }
+.film__title, .film__credits { text-align: right; }
+.film__slider { margin-top: 46px; }
+
+@media (min-width: 768px) {
+  .music, .film { grid-template-rows: auto auto 1fr; }
+  .music__credits, .film__credits { margin-top: 10px; }
+
+  /* Music: text left, slider bleeds off the right edge */
+  .music { padding-bottom: 116px; --pad-top: calc(var(--row) * 1.67); }
+  .music__title   { grid-column: 2 / 7; }
+  .music__credits { grid-column: 2 / 7; }
+  .music__slider  { grid-column: 7 / -1; grid-row: 1 / 4; margin-top: 0; }
+
+  /* Film: slider bleeds off the left edge, text right */
+  .film { padding-bottom: 93px; --pad-top: calc(var(--row) * 1.67); }
+  .film__title   { grid-column: 10 / 26; }
+  .film__credits { grid-column: 20 / 26; }
+  .film__slider  { grid-column: 1 / 19; grid-row: 1 / 4; margin-top: 0; }
+}
+
+/* --- Slider ---------------------------------------------------------------- */
+.slider {
+  position: relative;
+  aspect-ratio: 2 / 1;      /* image height = half the slider width */
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;      /* vertical page scroll still works, horizontal swipe = slide */
+  outline-offset: 4px;
+}
+.slider.is-dragging { cursor: grabbing; }
+
+.slider__track {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+  transition: transform 0.8s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.slider__track.no-transition { transition: none; }
+
+.slider__track img {
+  flex: none;
+  height: 100%;
+  width: auto;              /* width follows each image's natural ratio */
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider__track { transition-duration: 0.01s; }
+}
+
+/* --- Footer ---------------------------------------------------------------- */
+.site-footer {
+  background: var(--dark);
+  color: var(--light);
+  padding: 82px 0 60px;
+  overflow: hidden;
+}
+.site-footer__links { text-align: center; }
+.site-footer__links li { margin-bottom: 13px; }
+.site-footer__links a {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.3em;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.site-footer__name {
+  margin: 50px var(--site-gutter) 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+  font-size: calc((100vw - var(--site-gutter) * 2) * var(--fit-ratio));
+  color: var(--light);
+  filter: blur(14px);       /* the soft, out-of-focus wordmark */
+  mix-blend-mode: lighten;
+}
+
+@media (min-width: 768px) {
+  .site-footer { padding: 57px 0 58px; }
+  .site-footer__links li { margin-bottom: 8px; }
+  .site-footer__name { margin: 64px 0 0; font-size: calc(100vw * var(--fit-ratio)); }
+}
